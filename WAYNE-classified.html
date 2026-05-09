@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>xWAYNE-iONEx · CLASSIFIED AUDIT</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@800&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: #000;
+  font-family: 'Share Tech Mono', monospace;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: crosshair;
+  overflow: hidden;
+}
+
+/* Scanlines */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background: repeating-linear-gradient(0deg,
+    transparent, transparent 3px,
+    rgba(255,208,0,0.008) 3px, rgba(255,208,0,0.008) 4px);
+  pointer-events:none; z-index:100;
+}
+
+/* Vignette */
+body::after {
+  content:'';
+  position:fixed; inset:0;
+  background: radial-gradient(ellipse 80% 80% at 50% 50%,
+    transparent 30%, rgba(0,0,0,0.85) 100%);
+  pointer-events:none; z-index:100;
+}
+
+/* Ambient glow */
+.glow {
+  position:fixed;
+  width:600px; height:600px;
+  border-radius:50%;
+  top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  background: radial-gradient(circle,
+    rgba(255,208,0,0.03) 0%, transparent 70%);
+  animation: breathe 4s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes breathe {
+  0%,100%{transform:translate(-50%,-50%) scale(1);opacity:0.6}
+  50%{transform:translate(-50%,-50%) scale(1.2);opacity:1}
+}
+
+/* Main card */
+.card {
+  position:relative; z-index:10;
+  width:min(580px, 94vw);
+  background: linear-gradient(180deg,#0c0c0c 0%,#060606 100%);
+  border:1px solid rgba(255,255,255,0.06);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.05),
+    0 0 0 1px rgba(0,0,0,0.8),
+    0 40px 120px rgba(0,0,0,1),
+    0 0 80px rgba(255,208,0,0.04);
+}
+
+/* Top bar */
+.topbar {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 24px;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+  background: linear-gradient(180deg,#111 0%,#0a0a0a 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.topbar-id {
+  font-size:9px; letter-spacing:3px; color:#333;
+}
+
+.topbar-status {
+  display:flex; align-items:center; gap:6px;
+  font-size:8px; letter-spacing:2px; color:#ff2200;
+}
+
+.dot-red {
+  width:6px; height:6px; border-radius:50%;
+  background:#ff2200;
+  box-shadow:0 0 6px rgba(255,30,0,0.8);
+  animation:blink 1.2s infinite;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+
+/* Header */
+.header {
+  padding:36px 32px 28px;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+}
+
+.report-num {
+  font-size:8px; letter-spacing:4px; color:#333;
+  margin-bottom:10px;
+}
+
+.report-title {
+  font-family:'Syne',sans-serif; font-weight:800;
+  font-size:clamp(28px,6vw,44px);
+  color:#e0e0e0;
+  letter-spacing:-1px; line-height:1;
+  text-shadow: 0 3px 0 rgba(0,0,0,1);
+}
+
+.report-title span { color:#ffd000; text-shadow:0 0 30px rgba(255,208,0,0.3), 0 3px 0 rgba(0,0,0,1); }
+
+.report-sub {
+  font-size:9px; letter-spacing:3px; color:#2a2a2a;
+  margin-top:10px;
+}
+
+/* Stats grid */
+.stats {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:2px; background:rgba(255,255,255,0.03);
+  margin:0;
+}
+
+.stat-block {
+  background: linear-gradient(180deg,#0a0a0a 0%,#060606 100%);
+  padding:24px 28px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+  position:relative; overflow:hidden;
+}
+
+.stat-block::before {
+  content:'';
+  position:absolute; top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04) 50%,transparent);
+}
+
+.stat-block.danger { border-left:2px solid #ff2200; }
+.stat-block.warn   { border-left:2px solid #ffd000; }
+.stat-block.info   { border-left:2px solid #333; }
+.stat-block.full   { grid-column:1/-1; border-left:2px solid #ffd000; }
+
+.stat-label {
+  font-size:7px; letter-spacing:3px; color:#2a2a2a;
+  text-transform:uppercase; margin-bottom:8px;
+}
+
+.stat-value {
+  font-family:'Syne',sans-serif; font-weight:800;
+  font-size:clamp(22px,5vw,36px);
+  line-height:1; letter-spacing:-1px;
+}
+
+.val-red   { color:#ff2200; text-shadow:0 0 20px rgba(255,30,0,0.4); }
+.val-gold  { color:#ffd000; text-shadow:0 0 20px rgba(255,208,0,0.3); }
+.val-white { color:#888; }
+
+.stat-note {
+  font-size:8px; color:#222; letter-spacing:1px; margin-top:6px;
+}
+
+/* Severity bars */
+.sev-row {
+  display:flex; align-items:center; gap:10px; margin-top:4px;
+}
+.sev-badge {
+  font-size:7px; letter-spacing:2px; padding:3px 8px;
+  border:1px solid; white-space:nowrap;
+}
+.sev-h { color:#ff2200; border-color:rgba(255,30,0,0.3); background:rgba(255,30,0,0.08); }
+.sev-m { color:#ffd000; border-color:rgba(255,208,0,0.3); background:rgba(255,208,0,0.06); }
+
+/* Lock section */
+.lock-section {
+  padding:28px 32px;
+  border-top:1px solid rgba(255,255,255,0.04);
+}
+
+.lock-label {
+  font-size:8px; letter-spacing:3px; color:#2a2a2a;
+  margin-bottom:16px; display:flex; align-items:center; gap:10px;
+}
+
+.lock-label::after {
+  content:''; flex:1; height:1px;
+  background:rgba(255,255,255,0.04);
+}
+
+/* Redacted lines */
+.redacted-block { margin-bottom:20px; }
+
+.redact-row {
+  display:flex; align-items:center; gap:10px;
+  margin-bottom:6px;
+}
+
+.redact-key {
+  font-size:8px; letter-spacing:2px; color:#1e1e1e;
+  width:120px; flex-shrink:0;
+}
+
+.redact-bar {
+  height:8px; border-radius:1px;
+  background: repeating-linear-gradient(
+    90deg,
+    #1a1a1a 0px, #1a1a1a 8px,
+    #151515 8px, #151515 10px
+  );
+  flex:1;
+  position:relative; overflow:hidden;
+}
+
+.redact-bar::after {
+  content:'CLASSIFIED';
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:6px; letter-spacing:3px; color:#222;
+}
+
+/* Password input */
+.pw-wrap {
+  margin-top:20px;
+  border:1px solid rgba(255,255,255,0.06);
+  background:#050505;
+  display:flex; align-items:center;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), inset 0 -1px 0 rgba(0,0,0,0.8);
+  position:relative;
+}
+
+.pw-prefix {
+  padding:0 14px;
+  font-size:10px; color:#333; letter-spacing:2px;
+  border-right:1px solid rgba(255,255,255,0.05);
+  height:100%; display:flex; align-items:center;
+  align-self:stretch;
+}
+
+.pw-input {
+  flex:1; background:transparent; border:none; outline:none;
+  font-family:'Share Tech Mono',monospace;
+  font-size:13px; letter-spacing:4px;
+  color:#ffd000; padding:16px 14px;
+  caret-color:#ffd000;
+}
+
+.pw-input::placeholder { color:#1e1e1e; letter-spacing:2px; font-size:9px; }
+
+.pw-btn {
+  background: linear-gradient(180deg,#1a1a1a 0%,#0e0e0e 100%);
+  border:none; border-left:1px solid rgba(255,255,255,0.05);
+  padding:0 20px; cursor:crosshair;
+  font-family:'Share Tech Mono',monospace;
+  font-size:8px; letter-spacing:3px; color:#333;
+  height:100%; align-self:stretch;
+  transition:all 0.2s;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.pw-btn:hover { color:#ffd000; background:linear-gradient(180deg,#222 0%,#111 100%); }
+
+/* Error */
+.pw-error {
+  font-size:8px; letter-spacing:2px; color:#ff2200;
+  margin-top:10px; opacity:0;
+  transition:opacity 0.3s;
+  display:flex; align-items:center; gap:6px;
+}
+.pw-error.show { opacity:1; }
+
+/* Footer */
+.card-footer {
+  padding:16px 32px;
+  border-top:1px solid rgba(255,255,255,0.03);
+  display:flex; justify-content:space-between; align-items:center;
+  background:linear-gradient(180deg,#080808 0%,#050505 100%);
+}
+
+.cf-left { font-size:8px; letter-spacing:2px; color:#1e1e1e; }
+.cf-right {
+  font-family:'Syne',sans-serif; font-weight:800;
+  font-size:13px; color:#1e1e1e; letter-spacing:-0.5px;
+}
+
+/* Unlocked state */
+.unlocked { display:none; }
+
+.unlock-flash {
+  position:fixed; inset:0; z-index:999;
+  background:#ffd000;
+  opacity:0; pointer-events:none;
+  animation:none;
+}
+
+@keyframes flash {
+  0%{opacity:0.3} 100%{opacity:0}
+}
+
+/* Corners */
+.corner { position:absolute; width:12px; height:12px; opacity:0.2; }
+.c-tl{top:-1px;left:-1px;border-top:1px solid #ffd000;border-left:1px solid #ffd000;}
+.c-tr{top:-1px;right:-1px;border-top:1px solid #ffd000;border-right:1px solid #ffd000;}
+.c-bl{bottom:-1px;left:-1px;border-bottom:1px solid #ffd000;border-left:1px solid #ffd000;}
+.c-br{bottom:-1px;right:-1px;border-bottom:1px solid #ffd000;border-right:1px solid #ffd000;}
+
+/* Typing cursor on value */
+@keyframes tvcur { 0%,100%{opacity:1}50%{opacity:0} }
+</style>
+</head>
+<body>
+
+<div class="glow"></div>
+<div class="unlock-flash" id="flash"></div>
+
+<div class="card">
+  <!-- Corners -->
+  <div class="corner c-tl"></div>
+  <div class="corner c-tr"></div>
+  <div class="corner c-bl"></div>
+  <div class="corner c-br"></div>
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="topbar-id">SCAN_RESULT · #001 · xWAYNE-iONEx</div>
+    <div class="topbar-status">
+      <div class="dot-red"></div>
+      UNPATCHED
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="report-num">// AUDIT_REPORT · CLASSIFIED · 2026</div>
+    <div class="report-title">THREAT<br><span>DETECTED</span></div>
+    <div class="report-sub">PROTOCOL_NAME: ████████████ · CHAIN: SOLANA · STATUS: UNPATCHED</div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+
+    <div class="stat-block danger">
+      <div class="stat-label">// TVL_AT_RISK</div>
+      <div class="stat-value val-red">$204M</div>
+      <div class="stat-note">Total value exposed at time of scan</div>
+    </div>
+
+    <div class="stat-block warn">
+      <div class="stat-label">// VECTORS_CONFIRMED</div>
+      <div class="stat-value val-gold">9</div>
+      <div class="stat-note">Viable attack paths · simulation proof</div>
+    </div>
+
+    <div class="stat-block full">
+      <div class="stat-label">// SEVERITY_BREAKDOWN</div>
+      <div class="sev-row">
+        <span class="sev-badge sev-h">HIGH × 3</span>
+        <span class="sev-badge sev-m">MEDIUM × 1</span>
+      </div>
+      <div class="stat-note" style="margin-top:10px">All findings include reproducible proof-of-concept simulation code</div>
+    </div>
+
+    <div class="stat-block info">
+      <div class="stat-label">// PATCH_STATUS</div>
+      <div class="stat-value val-white">PENDING</div>
+      <div class="stat-note">Disclosed · awaiting response</div>
+    </div>
+
+    <div class="stat-block info">
+      <div class="stat-label">// FALSE_POSITIVES</div>
+      <div class="stat-value val-white">0</div>
+      <div class="stat-note">Every finding verified on-chain</div>
+    </div>
+
+  </div>
+
+  <!-- Lock section -->
+  <div class="lock-section">
+    <div class="lock-label">// CLASSIFIED_CONTENT</div>
+
+    <div class="redacted-block">
+      <div class="redact-row">
+        <div class="redact-key">PROTOCOL_NAME</div>
+        <div class="redact-bar"></div>
+      </div>
+      <div class="redact-row">
+        <div class="redact-key">VULNERABILITY_01</div>
+        <div class="redact-bar"></div>
+      </div>
+      <div class="redact-row">
+        <div class="redact-key">VULNERABILITY_02</div>
+        <div class="redact-bar"></div>
+      </div>
+      <div class="redact-row">
+        <div class="redact-key">VULNERABILITY_03</div>
+        <div class="redact-bar"></div>
+      </div>
+      <div class="redact-row">
+        <div class="redact-key">ATTACK_VECTOR</div>
+        <div class="redact-bar"></div>
+      </div>
+      <div class="redact-row">
+        <div class="redact-key">POC_CODE</div>
+        <div class="redact-bar"></div>
+      </div>
+      <div class="redact-row">
+        <div class="redact-key">FIX_RECOMMENDATIONS</div>
+        <div class="redact-bar"></div>
+      </div>
+    </div>
+
+    <div class="pw-wrap">
+      <div class="pw-prefix">PWD://</div>
+      <input
+        class="pw-input"
+        id="pw"
+        type="password"
+        placeholder="enter access code"
+        onkeydown="if(event.key==='Enter')unlock()"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button class="pw-btn" onclick="unlock()">UNLOCK →</button>
+    </div>
+    <div class="pw-error" id="pw-error">⬤ ACCESS_DENIED · INVALID_CODE</div>
+  </div>
+
+  <!-- Footer -->
+  <div class="card-footer">
+    <div class="cf-left">github.com/xWAYNE-iONEx · INDEPENDENT SECURITY RESEARCH</div>
+    <div class="cf-right">-WAYNE-</div>
+  </div>
+
+</div>
+
+<script>
+  // ── SET YOUR PASSWORD HERE ──
+  const PASSWORD = 'xWAYNE2026';
+  // ───────────────────────────
+
+  let attempts = 0;
+
+  function unlock() {
+    const input = document.getElementById('pw');
+    const error = document.getElementById('pw-error');
+    const flash = document.getElementById('flash');
+
+    if (input.value === PASSWORD) {
+      // Flash effect
+      flash.style.animation = 'flash 0.6s ease forwards';
+      setTimeout(() => {
+        window.location.href = 'WAYNE-sanctum-infinity-audit.html';
+      }, 400);
+    } else {
+      attempts++;
+      error.classList.add('show');
+      input.value = '';
+      input.style.color = '#ff2200';
+
+      // Shake
+      input.style.transform = 'translateX(-6px)';
+      setTimeout(() => input.style.transform = 'translateX(6px)', 80);
+      setTimeout(() => input.style.transform = 'translateX(-4px)', 160);
+      setTimeout(() => input.style.transform = 'translateX(4px)', 240);
+      setTimeout(() => {
+        input.style.transform = 'translateX(0)';
+        input.style.color = '#ffd000';
+      }, 320);
+
+      // Lock out after 5 attempts
+      if (attempts >= 5) {
+        input.disabled = true;
+        input.placeholder = 'ACCESS_LOCKED';
+        document.querySelector('.pw-btn').disabled = true;
+        error.textContent = '⬤ LOCKOUT_ACTIVE · TOO_MANY_ATTEMPTS';
+      }
+    }
+  }
+</script>
+</body>
+</html>

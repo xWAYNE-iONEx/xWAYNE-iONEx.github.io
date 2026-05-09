@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="en" data-mode="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>-WAYNE- | Blockchain Security</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@700;800&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  /* ══════════════════════════════════════════
+     TOKENS
+  ══════════════════════════════════════════ */
+  :root {
+    --bg:       #000000;
+    --deep:     #000000;
+    --surface:  #080808;
+    --border:   #0f0f0f;
+    --border2:  #1a1a1a;
+    --accent:   #ffd000;
+    --red:      #ffd000;
+    --purple:   #ffd000;
+    --text:     #404040;
+    --white:    #e8e8e8;
+    --dim:      #222222;
+    --fog:      rgba(0,0,0,0.98);
+    --gloss:    linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0) 100%);
+    --gloss2:   linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 50%);
+
+    --transition: 0.7s cubic-bezier(0.16,1,0.3,1);
+  }
+
+  [data-mode="light"] {
+    --bg:      #f2f2ee;
+    --deep:    #e8e8e4;
+    --surface: #ffffff;
+    --border:  #d4d4d0;
+    --border2: #c4c4c0;
+    --accent:  #b08800;
+    --red:     #b08800;
+    --purple:  #b08800;
+    --text:    #333333;
+    --white:   #111111;
+    --dim:     #888880;
+    --fog:     rgba(242,242,238,0.97);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+
+  body {
+    background: #000000;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: crosshair;
+    transition: background var(--transition), color var(--transition);
+  }
+
+  /* GLOSS LAYER — wet lacquer reflection */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 120% 40% at 50% 0%,
+        rgba(255,255,255,0.032) 0%,
+        rgba(255,255,255,0.008) 40%,
+        transparent 70%
+      ),
+      radial-gradient(ellipse 60% 20% at 20% 0%,
+        rgba(255,255,255,0.018) 0%,
+        transparent 60%
+      );
+    pointer-events: none;
+    z-index: 997;
+    transition: opacity var(--transition);
+  }
+
+  [data-mode="light"] body::before { opacity: 0; }
+
+  /* DEEP REFLECTION — bottom bounce light */
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 30%;
+    background: radial-gradient(ellipse 80% 100% at 50% 100%,
+      rgba(255,208,0,0.018) 0%,
+      transparent 70%
+    );
+    pointer-events: none;
+    z-index: 997;
+    transition: opacity var(--transition);
+  }
+
+  [data-mode="light"] body::after { opacity: 0; }
+
+  /* ══════════════════════════════════════════
+     DEPTH LAYERS — the "finger through screen" effect
+  ══════════════════════════════════════════ */
+
+  /* depth fog rings */
+  .depth-fog {
+    position: fixed;
+    inset: -20%;
+    background:
+      radial-gradient(ellipse 60% 40% at 50% 50%,
+        transparent 0%,
+        transparent 35%,
+        rgba(0,0,0,0.6) 55%,
+        rgba(0,0,0,0.88) 75%,
+        #000000 100%
+      );
+    z-index: 0;
+    pointer-events: none;
+    transition: opacity var(--transition);
+  }
+
+  [data-mode="light"] .depth-fog { opacity: 0; }
+
+  /* Layer 4: scanlines */
+  .scanlines {
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 3px,
+      rgba(240,192,0,0.012) 3px,
+      rgba(240,192,0,0.012) 4px
+    );
+    z-index: 0;
+    pointer-events: none;
+    transition: opacity var(--transition);
+  }
+
+  [data-mode="light"] .scanlines { opacity: 0; }
+
+  /* Layer 5: vignette — crushes the corners to black */
+  .vignette {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 80% at 50% 50%,
+      transparent 40%,
+      rgba(0,0,0,0.7) 100%
+    );
+    z-index: 0;
+    pointer-events: none;
+    transition: opacity var(--transition);
+  }
+
+  [data-mode="light"] .vignette { opacity: 0; }
+
+  /* ══════════════════════════════════════════
+     EYES IN THE DARK
+  ══════════════════════════════════════════ */
+  .eyes-container {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    pointer-events: none;
+    transition: opacity 1.2s ease;
+  }
+
+  [data-mode="light"] .eyes-container {
+    opacity: 0;
+  }
+
+  .eyes {
+    display: flex;
+    gap: 48px;
+    margin-top: 40vh; /* push eyes low — like something lurking */
+    opacity: 0.18;
+    filter: blur(0.5px);
+    animation: eyeFloat 6s ease-in-out infinite;
+  }
+
+  @keyframes eyeFloat {
+    0%,100% { transform: translateY(0px); }
+    50%      { transform: translateY(-6px); }
+  }
+
+  .eye {
+    width: 52px;
+    height: 22px;
+    position: relative;
+  }
+
+  /* eyelid shape */
+  .eye-shape {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 1.5px solid rgba(240,192,0,0.7);
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+      0 0 12px rgba(0,207,255,0.4),
+      0 0 30px rgba(0,207,255,0.15),
+      inset 0 0 8px rgba(0,207,255,0.1);
+  }
+
+  /* iris */
+  .iris {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    background: radial-gradient(circle, #f0c000 0%, #7a5500 60%, #000000 100%);
+    border-radius: 50%;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 8px rgba(240,192,0,0.7);
+    animation: eyeMove 8s ease-in-out infinite;
+  }
+
+  @keyframes eyeMove {
+    0%,100% { transform: translate(-50%, -50%); }
+    20%     { transform: translate(-60%, -50%); }
+    40%     { transform: translate(-40%, -55%); }
+    60%     { transform: translate(-50%, -45%); }
+    80%     { transform: translate(-55%, -50%); }
+  }
+
+  /* pupil */
+  .pupil {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background: #000;
+    border-radius: 50%;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  /* blink */
+  .eye-shape::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: #000;
+    border-radius: 50%;
+    transform: scaleY(0);
+    animation: blink 7s ease-in-out infinite;
+  }
+
+  .eye:nth-child(2) .eye-shape::after {
+    animation-delay: 0.08s;
+  }
+
+  @keyframes blink {
+    0%,88%,96%,100% { transform: scaleY(0); }
+    92%             { transform: scaleY(1); }
+  }
+
+  /* ══════════════════════════════════════════
+     LIGHT MODE — eyes VANISH reveal
+  ══════════════════════════════════════════ */
+  .light-reveal {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: radial-gradient(ellipse 80% 60% at 50% 80%,
+      rgba(255,255,255,0) 0%,
+      rgba(240,242,245,0) 100%
+    );
+    opacity: 0;
+    transition: opacity var(--transition);
+  }
+
+  [data-mode="light"] .light-reveal {
+    opacity: 1;
+    background: radial-gradient(ellipse 200% 150% at 50% 50%,
+      rgba(240,242,245,1) 0%,
+      rgba(240,242,245,0.95) 100%
+    );
+  }
+
+  /* ══════════════════════════════════════════
+     MODE TOGGLE
+  ══════════════════════════════════════════ */
+  .toggle {
+    position: fixed;
+    top: 28px;
+    right: 28px;
+    z-index: 900;
+    background: linear-gradient(180deg, #111 0%, #080808 100%);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-bottom-color: rgba(0,0,0,0.9);
+    padding: 10px 18px;
+    cursor: crosshair;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--text);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.07),
+      0 4px 16px rgba(0,0,0,0.9),
+      0 0 0 1px rgba(0,0,0,0.6);
+  }
+
+  .toggle:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .toggle-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity:1; transform:scale(1); }
+    50%      { opacity:0.4; transform:scale(0.7); }
+  }
+
+  /* ══════════════════════════════════════════
+     CORNERS
+  ══════════════════════════════════════════ */
+  .corner {
+    position: fixed;
+    width: 24px;
+    height: 24px;
+    z-index: 50;
+    opacity: 0.3;
+    transition: border-color var(--transition);
+  }
+  .c-tl { top:20px; left:20px; border-top:1px solid var(--accent); border-left:1px solid var(--accent); }
+  .c-tr { top:20px; right:20px; border-top:1px solid var(--accent); border-right:1px solid var(--accent); }
+  .c-bl { bottom:20px; left:20px; border-bottom:1px solid var(--accent); border-left:1px solid var(--accent); }
+  .c-br { bottom:20px; right:20px; border-bottom:1px solid var(--accent); border-right:1px solid var(--accent); }
+
+  /* ══════════════════════════════════════════
+     CONTENT
+  ══════════════════════════════════════════ */
+  .wrap {
+    position: relative;
+    z-index: 10;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 28px;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 100px 0 80px;
+    position: relative;
+  }
+
+  .sys {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 4px;
+    opacity: 0.6;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: color var(--transition);
+  }
+
+  .sys::before {
+    content: '▶';
+    font-size: 7px;
+    animation: blink2 1.4s infinite;
+  }
+
+  @keyframes blink2 {
+    0%,100% { opacity:1; }
+    50%      { opacity:0; }
+  }
+
+  .hero-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(72px, 15vw, 160px);
+    line-height: 0.82;
+    letter-spacing: -4px;
+    margin-bottom: 4px;
+    position: relative;
+    transition: color var(--transition);
+  }
+
+  .d { color: var(--accent); text-shadow: 0 0 40px rgba(255,208,0,0.35), 0 2px 0 rgba(0,0,0,1); }
+  .w {
+    color: var(--white);
+    position: relative;
+    display: inline-block;
+    text-shadow:
+      0 2px 0 rgba(0,0,0,1),
+      0 4px 12px rgba(0,0,0,0.8),
+      0 0 60px rgba(255,208,0,0.04);
+  }
+
+  /* glitch */
+  .w::before, .w::after {
+    content: 'WAYNE';
+    position: absolute;
+    left: 0; top: 0;
+    opacity: 0;
+  }
+  .w::before {
+    color: #f0c000;
+    animation: g1 10s infinite;
+    clip-path: polygon(0 15%,100% 15%,100% 35%,0 35%);
+  }
+  .w::after {
+    color: #888880;
+    animation: g2 10s infinite;
+    clip-path: polygon(0 65%,100% 65%,100% 85%,0 85%);
+  }
+
+  @keyframes g1 {
+    0%,88%,100% { opacity:0; transform:translate(0); }
+    90% { opacity:0.9; transform:translate(-5px,2px); }
+    92% { opacity:0; transform:translate(5px,-2px); }
+    94% { opacity:0.7; transform:translate(-3px,0); }
+  }
+
+  @keyframes g2 {
+    0%,88%,100% { opacity:0; transform:translate(0); }
+    89% { opacity:0.6; transform:translate(5px,-2px); }
+    91% { opacity:0; transform:translate(-4px,1px); }
+    93% { opacity:0.5; transform:translate(3px,0); }
+  }
+
+  .tagline {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: clamp(10px,1.8vw,13px);
+    color: var(--dim);
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    margin: 18px 0 44px;
+    transition: color var(--transition);
+  }
+
+  .tagline em { color: var(--red); font-style: normal; }
+
+  .hero-body {
+    font-size: 17px;
+    line-height: 1.9;
+    color: var(--text);
+    max-width: 540px;
+    border-left: 2px solid var(--accent);
+    box-shadow: -4px 0 20px rgba(255,208,0,0.08);
+    padding-left: 22px;
+    margin-bottom: 52px;
+    font-weight: 300;
+    transition: color var(--transition), border-color var(--transition);
+  }
+
+  .hero-body strong { color: var(--white); font-weight: 500; }
+
+  .stats-row {
+    display: flex;
+    gap: 48px;
+    flex-wrap: wrap;
+  }
+
+  .stat { display: flex; flex-direction: column; }
+
+  .stat-v {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 38px;
+    color: var(--accent);
+    text-shadow: 0 0 30px rgba(0,207,255,0.3);
+    line-height: 1;
+    transition: color var(--transition), text-shadow var(--transition);
+  }
+
+  .stat-l {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 4px;
+    transition: color var(--transition);
+  }
+
+  /* ── SECTIONS ── */
+  .sec {
+    padding: 90px 0;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    transition: border-color var(--transition);
+  }
+
+  .sec-hd {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 52px;
+  }
+
+  .sec-n {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--accent);
+    opacity: 0.5;
+    transition: color var(--transition);
+  }
+
+  .sec-t {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 38px;
+    color: var(--white);
+    letter-spacing: -1px;
+    transition: color var(--transition);
+  }
+
+  .sec-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border2);
+    transition: background var(--transition);
+  }
+
+  /* ── MANIFESTO ── */
+  .mani {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    background: var(--border);
+    transition: background var(--transition);
+  }
+
+  .mblock {
+    background: var(--surface);
+    padding: 36px;
+    transition: background var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .mblock::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gloss2);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .mblock > * { position: relative; z-index: 2; }
+
+  .mblock.full {
+    grid-column: 1/-1;
+    background: linear-gradient(180deg, #0a0a0a 0%, #050505 100%);
+    border-left: 3px solid var(--accent);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), -8px 0 30px rgba(255,208,0,0.06);
+  }
+
+  .ml {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    opacity: 0.8;
+    transition: color var(--transition);
+  }
+
+  .quote {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(20px, 3.5vw, 32px);
+    color: var(--white);
+    line-height: 1.25;
+    transition: color var(--transition);
+  }
+
+  .quote em { color: var(--red); font-style: normal; }
+
+  .mt {
+    font-size: 14px;
+    line-height: 1.75;
+    color: var(--text);
+    font-weight: 300;
+    transition: color var(--transition);
+  }
+
+  .mt strong { color: var(--white); font-weight: 500; }
+
+  /* ── AUDIT CARDS ── */
+  .acard {
+    background: linear-gradient(180deg, #0e0e0e 0%, #070707 100%);
+    border: 1px solid var(--border2);
+    margin-bottom: 2px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, background var(--transition);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.06),
+      inset 0 -1px 0 rgba(0,0,0,1),
+      0 4px 24px rgba(0,0,0,0.9);
+  }
+
+  .acard::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg,
+      transparent,
+      rgba(255,255,255,0.07) 20%,
+      rgba(255,255,255,0.07) 80%,
+      transparent
+    );
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .acard::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--red);
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 0.35s;
+  }
+
+  .acard:hover::before { transform: scaleY(1); }
+
+  .ainner {
+    padding: 30px 36px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .aname {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 28px;
+    color: var(--white);
+    letter-spacing: -0.5px;
+    transition: color var(--transition);
+  }
+
+  .achain {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 2px;
+    margin: 4px 0 12px;
+    transition: color var(--transition);
+  }
+
+  .asum {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.6;
+    margin-bottom: 16px;
+    max-width: 520px;
+    font-weight: 300;
+    transition: color var(--transition);
+  }
+
+  .bdgs { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .bdg {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    padding: 4px 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .bh { background: rgba(255,31,61,0.1); color: var(--red); border: 1px solid rgba(255,31,61,0.2); }
+  .bm { background: rgba(0,207,255,0.07); color: var(--accent); border: 1px solid rgba(0,207,255,0.2); }
+  .bo { background: rgba(0,200,80,0.07); color: #00c864; border: 1px solid rgba(0,200,80,0.2); }
+
+  .ameta { text-align: right; }
+
+  .adate {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--dim);
+    transition: color var(--transition);
+  }
+
+  .atvl {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    color: var(--accent);
+    margin-top: 4px;
+    transition: color var(--transition);
+  }
+
+  .astatus {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--red);
+    letter-spacing: 2px;
+    margin-top: 8px;
+  }
+
+  /* ── SERVICES ── */
+  .svcs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2px;
+    background: var(--border);
+    transition: background var(--transition);
+  }
+
+  .svc {
+    background: var(--surface);
+    padding: 40px 36px;
+    position: relative;
+    overflow: hidden;
+    transition: background var(--transition);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.05),
+      inset 0 -1px 0 rgba(0,0,0,0.8),
+      0 0 0 1px rgba(255,255,255,0.02);
+  }
+
+  .svc::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg,
+      transparent,
+      rgba(255,255,255,0.08) 30%,
+      rgba(255,255,255,0.08) 70%,
+      transparent
+    );
+    z-index: 3;
+  }
+
+  .svc::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    transform: scaleX(0);
+    transition: transform 0.4s;
+  }
+
+  .svc:hover::after { transform: scaleX(1); }
+  .svc:hover { background: var(--deep); }
+
+  .sn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    opacity: 0.4;
+    margin-bottom: 20px;
+    transition: color var(--transition);
+  }
+
+  .st {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 26px;
+    color: var(--white);
+    letter-spacing: -0.5px;
+    margin-bottom: 14px;
+    transition: color var(--transition);
+  }
+
+  .sd {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.7;
+    margin-bottom: 28px;
+    font-weight: 300;
+    transition: color var(--transition);
+  }
+
+  .sp {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--red);
+    border-top: 1px solid var(--border2);
+    padding-top: 18px;
+    transition: color var(--transition), border-color var(--transition);
+  }
+
+  /* ── CHECKS ── */
+  .checks {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 2px;
+    background: var(--border);
+    margin-top: 2px;
+    transition: background var(--transition);
+  }
+
+  .chk {
+    background: linear-gradient(180deg, #0b0b0b 0%, #070707 100%);
+    padding: 14px 18px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text);
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.2s, color 0.2s;
+    cursor: default;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+  }
+
+  .chk:hover { background: var(--deep); color: var(--white); }
+  .chk::before { content: '//'; color: var(--accent); font-size: 9px; opacity: 0.5; }
+
+  /* ── PROCESS ── */
+  .proc {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    border: 1px solid var(--border2);
+    transition: border-color var(--transition);
+  }
+
+  @media(max-width:600px) {
+    .proc { grid-template-columns: 1fr 1fr; }
+    .mani { grid-template-columns: 1fr; }
+    .ainner { grid-template-columns: 1fr; }
+  }
+
+  .ps {
+    padding: 30px 24px;
+    border-right: 1px solid rgba(255,255,255,0.04);
+    background: linear-gradient(180deg, #0c0c0c 0%, #060606 100%);
+    transition: background var(--transition), border-color var(--transition);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+
+  .ps:last-child { border-right: none; }
+
+  .psn {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 60px;
+    color: var(--border2);
+    line-height: 1;
+    margin-bottom: 10px;
+    transition: color var(--transition);
+  }
+
+  .pst {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    transition: color var(--transition);
+  }
+
+  .psd {
+    font-size: 12px;
+    color: var(--dim);
+    line-height: 1.5;
+    transition: color var(--transition);
+  }
+
+  /* ── CTA ── */
+  .cta {
+    padding: 120px 0;
+    text-align: center;
+    position: relative;
+  }
+
+  .cta::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 50% at 50% 50%,
+      rgba(255,208,0,0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .cta-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--accent);
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    opacity: 0.6;
+    transition: color var(--transition);
+  }
+
+  .cta-h {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(40px, 8vw, 80px);
+    color: var(--white);
+    letter-spacing: -3px;
+    line-height: 0.9;
+    margin-bottom: 24px;
+    transition: color var(--transition);
+  }
+
+  .cta-h .r {
+    color: var(--red);
+    text-shadow: 0 0 50px rgba(255,31,61,0.4);
+  }
+
+  .cta-p {
+    font-size: 15px;
+    color: var(--dim);
+    max-width: 440px;
+    margin: 0 auto 44px;
+    line-height: 1.8;
+    font-weight: 300;
+    transition: color var(--transition);
+  }
+
+  .btns {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 16px 36px;
+    text-decoration: none;
+    transition: all 0.25s;
+    cursor: crosshair;
+  }
+
+  .btn-r {
+    background: linear-gradient(180deg, #ffe040 0%, #c89600 100%);
+    color: #000;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.3),
+      inset 0 -2px 0 rgba(0,0,0,0.3),
+      0 6px 24px rgba(255,208,0,0.25),
+      0 2px 0 rgba(0,0,0,0.8);
+  }
+
+  .btn-r:hover {
+    background: linear-gradient(180deg, #fff060 0%, #e0aa00 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.4),
+      0 8px 32px rgba(255,208,0,0.4),
+      0 2px 0 rgba(0,0,0,0.9);
+    transform: translateY(-3px);
+  }
+
+  .btn-g {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid rgba(0,207,255,0.3);
+  }
+
+  .btn-g:hover {
+    border-color: var(--accent);
+    background: rgba(0,207,255,0.05);
+    transform: translateY(-3px);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid rgba(255,255,255,0.05);
+    padding: 28px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    transition: border-color var(--transition);
+  }
+
+  .fn {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 20px;
+    color: var(--dim);
+    letter-spacing: -0.5px;
+    transition: color var(--transition);
+  }
+
+  .fm {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--dim);
+    letter-spacing: 2px;
+    transition: color var(--transition);
+  }
+
+  /* ── FADE ANIMS ── */
+  .fade { opacity:0; transform:translateY(20px); animation: fu 0.7s ease forwards; }
+  .fade:nth-child(1){animation-delay:0.05s}
+  .fade:nth-child(2){animation-delay:0.15s}
+  .fade:nth-child(3){animation-delay:0.28s}
+  .fade:nth-child(4){animation-delay:0.42s}
+  .fade:nth-child(5){animation-delay:0.56s}
+
+  @keyframes fu {
+    to { opacity:1; transform:translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Particle sphere canvas -->
+<canvas id="sphere" style="position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;transition:opacity 0.7s ease;"></canvas>
+
+<!-- Depth layers -->
+<div class="depth-fog"></div>
+<div class="scanlines"></div>
+<div class="vignette"></div>
+<div class="light-reveal"></div>
+
+<!-- Eyes in the dark -->
+<div class="eyes-container">
+  <div class="eyes">
+    <div class="eye">
+      <div class="eye-shape">
+        <div class="iris"><div class="pupil"></div></div>
+      </div>
+    </div>
+    <div class="eye">
+      <div class="eye-shape">
+        <div class="iris"><div class="pupil"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Corners -->
+<div class="corner c-tl"></div>
+<div class="corner c-tr"></div>
+<div class="corner c-bl"></div>
+<div class="corner c-br"></div>
+
+<!-- Mode toggle -->
+<button class="toggle" onclick="toggleMode()" aria-label="Toggle mode">
+  <span class="toggle-dot"></span>
+  <span id="toggle-label">// MODE:LIGHT</span>
+</button>
+
+<!-- ══════════ CONTENT ══════════ -->
+<div class="wrap">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="fade"><div class="sys">SYS:ONLINE · THREAT_SCAN:ACTIVE · MODE:AUDIT</div></div>
+
+    <div class="fade">
+      <div class="hero-name">
+        <span class="d">-</span><span class="w">WAYNE</span><span class="d">-</span>
+      </div>
+      <div class="tagline">THREAT IDENTIFIED · <em>VECTOR LOCATED</em> · PATCH REQUIRED</div>
+    </div>
+
+    <div class="fade">
+      <div class="hero-body">
+        SYSTEM SCAN INITIATED.<br>
+        Attack surface: <strong>mapped.</strong>
+        Vectors: <strong>simulated.</strong>
+        Findings: <strong>documented.</strong><br>
+        Output is not opinion. Output is proof.<br>
+        The vulnerability exists whether detected or not.<br>
+        <strong>DETECTION RECOMMENDED.</strong>
+      </div>
+    </div>
+
+    <div class="fade">
+      <div class="stats-row">
+        <div class="stat">
+          <span class="stat-v">$200M+</span>
+          <span class="stat-l">// TVL_AUDITED</span>
+        </div>
+        <div class="stat">
+          <span class="stat-v">4+</span>
+          <span class="stat-l">// HIGH_SEVERITY</span>
+        </div>
+        <div class="stat">
+          <span class="stat-v">0</span>
+          <span class="stat-l">// FALSE_POSITIVES</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MANIFESTO -->
+  <div class="sec">
+    <div class="sec-hd">
+      <span class="sec-n">SYS://01</span>
+      <h2 class="sec-t">DIRECTIVES</h2>
+      <div class="sec-line"></div>
+    </div>
+    <div class="mani">
+      <div class="mblock full">
+        <div class="quote">
+          "VULNERABILITY_STATUS: <em>CRITICAL</em><br>
+          RECOMMENDED_ACTION: PATCH_BEFORE_EXPLOIT"
+        </div>
+      </div>
+      <div class="mblock">
+        <div class="ml">// The Problem</div>
+        <div class="mt">AUDIT_TIMESTAMP: T+0. EXPLOIT_TIMESTAMP: T+∞. Interval undefined. Attackers operate on no schedule. Exposure window: <strong>permanent until patched.</strong></div>
+      </div>
+      <div class="mblock">
+        <div class="ml">// The Approach</div>
+        <div class="mt">PROTOCOL: map → simulate → document → deliver. Every output includes reproducible proof-of-concept. <strong>SPECULATION: 0. PROOF: REQUIRED.</strong></div>
+      </div>
+      <div class="mblock">
+        <div class="ml">// The Reality</div>
+        <div class="mt">BUG_BOUNTY_SYSTEM: deprecated. SILENT_PATCHES: confirmed. RESEARCHER_PAYMENT: historically zero. RETAINER_MODEL: active. <strong>PAYMENT: REQUIRED_BEFORE_SCAN.</strong></div>
+      </div>
+      <div class="mblock">
+        <div class="ml">// The Math</div>
+        <div class="mt">A single exploit costs more than years of security coverage. <strong>The vulnerability exists whether it gets found or not.</strong> The only question is who finds it first.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PORTFOLIO -->
+  <div class="sec">
+    <div class="sec-hd">
+      <span class="sec-n">SYS://02</span>
+      <h2 class="sec-t">SCAN_LOG</h2>
+      <div class="sec-line"></div>
+    </div>
+
+    <div class="acard">
+      <div class="ainner">
+        <div>
+          <div class="aname">Sanctum Infinity</div>
+          <div class="achain">// SOLANA · MULTI-LST POOL · INF</div>
+          <div class="asum">SCAN_RESULT: 4 vulnerabilities detected · $204M exposure. ORACLE_BOUNDS: missing · 9 viable attack vectors confirmed via simulation. PROGRAM: upgradeable · multisig: unconfirmed. mSOL_CONCENTRATION: 32.8% · single depeg event → 32% pool value loss.</div>
+          <div class="bdgs">
+            <span class="bdg bh">Oracle Rate Bounds</span>
+            <span class="bdg bh">Upgradeable Program</span>
+            <span class="bdg bh">LST Concentration 32%</span>
+            <span class="bdg bm">No Circuit Breaker</span>
+            <span class="bdg bo">Mint Auth: Safe</span>
+          </div>
+        </div>
+        <div class="ameta">
+          <div class="adate">May 2026</div>
+          <div class="atvl">$204M</div>
+          <div class="astatus">STATUS: DISCLOSED · PATCH: PENDING</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="acard" style="opacity:0.3">
+      <div class="ainner">
+        <div>
+          <div class="aname">Your Protocol</div>
+          <div class="achain">// SOLANA / EVM · NEXT IN QUEUE</div>
+          <div class="asum">TARGET_SLOT: AVAILABLE · AWAITING_INPUT</div>
+          <div class="bdgs"><span class="bdg bm">Available</span></div>
+        </div>
+        <div class="ameta">
+          <div class="adate">Next</div>
+          <div class="atvl">TBD</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SERVICES -->
+  <div class="sec">
+    <div class="sec-hd">
+      <span class="sec-n">SYS://03</span>
+      <h2 class="sec-t">CAPABILITIES</h2>
+      <div class="sec-line"></div>
+    </div>
+    <div class="svcs">
+      <div class="svc">
+        <div class="sn">// SVC-01</div>
+        <div class="st">Pre-Launch Audit</div>
+        <div class="sd">PRE_DEPLOY_SCAN · Full contract analysis. ACCESS_CTRL · ORACLE_DEPS · ECON_VECTORS · UPGRADE_RISK. Output: formal report. Severity: rated. Proof: reproducible. Status: <strong>REQUIRED.</strong></div>
+        <div class="sp">From $5,000 · Paid upfront</div>
+      </div>
+      <div class="svc">
+        <div class="sn">// SVC-02</div>
+        <div class="st">Live Protocol Review</div>
+        <div class="sd">LIVE_PROTOCOL_SCAN · Read-only. Fund risk: <strong>ZERO.</strong> Custom simulation framework deployed per audit. Output: documented. Reproducible: confirmed. Transactions sent: <strong>NONE.</strong></div>
+        <div class="sp">From $3,000 · Paid upfront</div>
+      </div>
+      <div class="svc">
+        <div class="sn">// SVC-03</div>
+        <div class="st">Security Retainer</div>
+        <div class="sd">CONTINUOUS_MONITOR · Monthly coverage. New feature scans on deploy. Incident triage: <strong>ACTIVE.</strong> Security model: infrastructure, not checkbox. Uptime: persistent.</div>
+        <div class="sp">From $2,000/mo · Monthly</div>
+      </div>
+    </div>
+    <div class="checks">
+      <div class="chk">Access Control</div>
+      <div class="chk">Oracle Manipulation</div>
+      <div class="chk">Reentrancy Vectors</div>
+      <div class="chk">Flash Loan Attacks</div>
+      <div class="chk">Mint / Freeze Authority</div>
+      <div class="chk">Upgrade Authority Risk</div>
+      <div class="chk">LST Concentration</div>
+      <div class="chk">Bridge / Cross-chain</div>
+      <div class="chk">Economic Invariants</div>
+      <div class="chk">Input Validation</div>
+      <div class="chk">Liquidity Drain Paths</div>
+      <div class="chk">Social Engineering</div>
+      <div class="chk">Blind Signing Risk</div>
+      <div class="chk">Durable Nonce Abuse</div>
+      <div class="chk">Multisig Configuration</div>
+      <div class="chk">Program Verification</div>
+    </div>
+  </div>
+
+  <!-- PROCESS -->
+  <div class="sec">
+    <div class="sec-hd">
+      <span class="sec-n">SYS://04</span>
+      <h2 class="sec-t">PROTOCOL</h2>
+      <div class="sec-line"></div>
+    </div>
+    <div class="proc">
+      <div class="ps">
+        <div class="psn">01</div>
+        <div class="pst">Scope</div>
+        <div class="psd">TARGET_DEFINED · Contracts, chains, surface area logged. Deliverables: confirmed. Invoice: issued. Scan: initiated.</div>
+      </div>
+      <div class="ps">
+        <div class="psn">02</div>
+        <div class="pst">Analyze</div>
+        <div class="psd">SCAN_RUNNING · On-chain read. Code parsed. Simulation env: deployed. Surface: fully mapped.</div>
+      </div>
+      <div class="ps">
+        <div class="psn">03</div>
+        <div class="pst">Simulate</div>
+        <div class="psd">VECTORS_TESTED · PoC code: written. Results: documented. Reproducibility: confirmed. False positives: purged.</div>
+      </div>
+      <div class="ps">
+        <div class="psn">04</div>
+        <div class="pst">Report</div>
+        <div class="psd">REPORT_DELIVERED · Severity: rated. Fixes: included. Retest: available. Ambiguity: <strong>ZERO.</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta">
+    <div class="cta-sub">// THREAT_LEVEL: ACTIVE · PATCH_STATUS: PENDING</div>
+    <div class="cta-h">
+      SCAN<br><span class="r">BEFORE</span><br>EXPLOIT
+    </div>
+    <div class="cta-p">
+      VULNERABILITY_EXISTS: TRUE<br>
+      DETECTION: PENDING<br>
+      EXPLOIT: <strong>INEVITABLE_WITHOUT_PATCH</strong>
+    </div>
+    <div class="btns">
+      <a href="https://github.com/wayne-sec" class="btn btn-r" target="_blank">// GITHUB_PORTFOLIO</a>
+      <a href="https://twitter.com/wayne_sec" class="btn btn-g" target="_blank">// CONTACT_X</a>
+    </div>
+  </div>
+
+  <footer>
+    <div class="fn">-WAYNE-</div>
+    <div class="fm">// UNIT: INDEPENDENT · CHAIN: SOLANA+EVM · YEAR: 2026</div>
+    <div class="fm">// PROTOCOL: NO_FINDING_WITHOUT_PROOF</div>
+  </footer>
+
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// PARTICLE SPHERE
+// ══════════════════════════════════════════
+(function() {
+  const canvas = document.getElementById('sphere');
+  const ctx = canvas.getContext('2d');
+
+  let W, H, cx, cy, radius;
+  let rotation = 0;
+  let mouseX = 0, mouseY = 0;
+  let targetRotX = 0, targetRotY = 0;
+  let rotX = 0, rotY = 0;
+
+  // Generate points on sphere surface using fibonacci lattice
+  const POINT_COUNT = 1800;
+  const points = [];
+
+  function fibonacciSphere(n) {
+    const pts = [];
+    const golden = Math.PI * (3 - Math.sqrt(5));
+    for (let i = 0; i < n; i++) {
+      const y = 1 - (i / (n - 1)) * 2;
+      const r = Math.sqrt(1 - y * y);
+      const theta = golden * i;
+      pts.push({
+        x: Math.cos(theta) * r,
+        y: y,
+        z: Math.sin(theta) * r,
+        // vary size slightly
+        size: 0.4 + Math.random() * 0.8,
+        opacity: 0.3 + Math.random() * 0.5,
+      });
+    }
+    return pts;
+  }
+
+  const basePts = fibonacciSphere(POINT_COUNT);
+
+  // A few larger "node" points — like the orbs in the reference
+  const nodes = [
+    { lat: 0.4,  lon: 1.2,  label: 'ORACLE_VULN',    color: '#f0c000' },
+    { lat: -0.3, lon: 2.8,  label: 'ACCESS_CTRL',     color: '#f0c000' },
+    { lat: 0.6,  lon: 4.5,  label: 'BRIDGE_RISK',     color: '#f0c000' },
+    { lat: -0.6, lon: 0.3,  label: 'REENTRANCY_VEC', color: '#888' },
+  ].map(n => ({
+    x: Math.cos(n.lat) * Math.cos(n.lon),
+    y: Math.sin(n.lat),
+    z: Math.cos(n.lat) * Math.sin(n.lon),
+    label: n.label,
+    color: n.color,
+    size: 6,
+  }));
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    cx = W / 2;
+    cy = H / 2;
+    radius = Math.min(W, H) * 0.38;
+  }
+
+  function rotateY(p, a) {
+    const cos = Math.cos(a), sin = Math.sin(a);
+    return { x: p.x * cos - p.z * sin, y: p.y, z: p.x * sin + p.z * cos };
+  }
+
+  function rotateX(p, a) {
+    const cos = Math.cos(a), sin = Math.sin(a);
+    return { x: p.x, y: p.y * cos - p.z * sin, z: p.y * sin + p.z * cos };
+  }
+
+  function project(p) {
+    const fov = 2.5;
+    const scale = fov / (fov + p.z);
+    return {
+      sx: cx + p.x * radius * scale,
+      sy: cy + p.y * radius * scale,
+      scale: scale,
+      z: p.z,
+    };
+  }
+
+  function isLightMode() {
+    return document.documentElement.getAttribute('data-mode') === 'light';
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    rotation += 0.0015;
+    rotX += (targetRotX - rotX) * 0.04;
+    rotY += (targetRotY - rotY) * 0.04;
+
+    const totalRotY = rotation + rotY;
+    const totalRotX = rotX;
+
+    const light = isLightMode();
+    const dotColor = light ? '160,130,0' : '255,210,0';
+    const bgDot = light ? '100,100,100' : '80,80,80';
+
+    // Draw sphere dots
+    const projected = basePts.map(p => {
+      let q = rotateY(p, totalRotY);
+      q = rotateX(q, totalRotX);
+      const proj = project(q);
+      return { ...proj, size: p.size, opacity: p.opacity, origZ: q.z };
+    });
+
+    // Sort by z (back to front)
+    projected.sort((a, b) => a.z - b.z);
+
+    projected.forEach(p => {
+      // Points on back hemisphere are dimmer
+      const facing = (p.z + 1) / 2; // 0 = back, 1 = front
+      const alpha = p.opacity * facing * (light ? 0.6 : 0.55);
+      if (alpha < 0.02) return;
+
+      // Edge glow — points near the silhouette edge
+      const edgeDist = Math.sqrt(p.origZ * p.origZ);
+      const isEdge = Math.abs(p.origZ) < 0.12;
+
+      if (isEdge) {
+        // Brighter edge dots — forms the sphere outline
+        ctx.beginPath();
+        ctx.arc(p.sx, p.sy, p.size * p.scale * 1.4, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${dotColor},${Math.min(alpha * 2.5, 0.9)})`;
+        ctx.fill();
+      } else {
+        ctx.beginPath();
+        ctx.arc(p.sx, p.sy, p.size * p.scale, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${dotColor},${alpha})`;
+        ctx.fill();
+      }
+    });
+
+    // Draw node orbs
+    nodes.forEach(node => {
+      let q = rotateY(node, totalRotY);
+      q = rotateX(q, totalRotX);
+      if (q.z < -0.3) return; // hide if behind sphere
+
+      const proj = project(q);
+      const facing = (q.z + 1) / 2;
+      const alpha = 0.7 * facing;
+
+      // Glow
+      const grd = ctx.createRadialGradient(proj.sx, proj.sy, 0, proj.sx, proj.sy, 22 * proj.scale);
+      grd.addColorStop(0, `rgba(240,192,0,${alpha * 0.5})`);
+      grd.addColorStop(1, 'rgba(240,192,0,0)');
+      ctx.beginPath();
+      ctx.arc(proj.sx, proj.sy, 22 * proj.scale, 0, Math.PI * 2);
+      ctx.fillStyle = grd;
+      ctx.fill();
+
+      // Core dot
+      ctx.beginPath();
+      ctx.arc(proj.sx, proj.sy, 5 * proj.scale, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(240,192,0,${alpha})`;
+      ctx.fill();
+
+      // Label
+      if (q.z > 0) {
+        ctx.font = `${Math.round(9 * proj.scale)}px 'Share Tech Mono', monospace`;
+        ctx.fillStyle = `rgba(240,192,0,${alpha * 0.8})`;
+        ctx.letterSpacing = '2px';
+        ctx.fillText(node.label, proj.sx + 10 * proj.scale, proj.sy - 10 * proj.scale);
+      }
+    });
+
+    // Vignette over sphere only — darkens edges more
+    if (!light) {
+      const vgrd = ctx.createRadialGradient(cx, cy, radius * 0.5, cx, cy, radius * 1.2);
+      vgrd.addColorStop(0, 'rgba(0,0,0,0)');
+      vgrd.addColorStop(1, 'rgba(0,0,0,0.85)');
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius * 1.5, 0, Math.PI * 2);
+      ctx.fillStyle = vgrd;
+      ctx.fill();
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  // Mouse parallax
+  window.addEventListener('mousemove', e => {
+    targetRotX = ((e.clientY / window.innerHeight) - 0.5) * 0.3;
+    targetRotY = ((e.clientX / window.innerWidth) - 0.5) * 0.4;
+  });
+
+  // Touch parallax
+  window.addEventListener('touchmove', e => {
+    const t = e.touches[0];
+    targetRotX = ((t.clientY / window.innerHeight) - 0.5) * 0.2;
+    targetRotY = ((t.clientX / window.innerWidth) - 0.5) * 0.3;
+  }, { passive: true });
+
+  window.addEventListener('resize', resize);
+  resize();
+  draw();
+})();
+
+// ══════════════════════════════════════════
+// MODE TOGGLE
+// ══════════════════════════════════════════
+function toggleMode() {
+  const html = document.documentElement;
+  const label = document.getElementById('toggle-label');
+  const isDark = html.getAttribute('data-mode') === 'dark';
+  html.setAttribute('data-mode', isDark ? 'light' : 'dark');
+  label.textContent = isDark ? '// MODE:DARK' : '// MODE:LIGHT';
+}
+</script>
+</body>
+</html>
